@@ -17,4 +17,13 @@ function add(id){if(locked||slots.includes(id)||slots.length>=4)return;slots.pus
 async function sendRecord(){if(recordSent){$('submitstatus').textContent='本次已嘗試傳送，請老師確認試算表紀錄。';return}if(!RECORD_ENDPOINT.startsWith('https://'))return;let btn=$('sendResult');btn.disabled=true;$('submitstatus').textContent='正在傳送…';try{await fetch(RECORD_ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(makeRecord())});recordSent=true;$('submitstatus').textContent='已發出成績資料；因 Google 跨網域限制，網頁無法確認是否成功寫入。請老師查看試算表；必要時下載 CSV 備份。'}catch(e){btn.disabled=false;$('submitstatus').textContent='傳送失敗，請檢查網路或部署網址，並下載 CSV 備份。'}}
 function downloadRecord(){let r=makeRecord(),fields=['學校','班級','座號','姓名','總分','開始時間','完成時間',...Array.from({length:5},(_,i)=>`第${i+1}關排序`),...Array.from({length:5},(_,i)=>`第${i+1}關得分`)];let vals=[r.schoolName,r.className,r.seatNo,r.studentName,r.total,r.startedAt,r.completedAt,...r.attempts.map(a=>a.order),...r.attempts.map(a=>a.score)];let csv='\ufeff'+fields.map(x=>'"'+String(x).replaceAll('"','""')+'"').join(',')+'\r\n'+vals.map(x=>'"'+String(x??'').replaceAll('"','""')+'"').join(',');let url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download=`新聞闖關_${r.schoolName}_${r.className}_${r.seatNo}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function restart(){start();window.scrollTo({top:0,behavior:'smooth'})}function toggleTeacher(){$('teachercontent').classList.toggle('hidden')};$('teacheranswers').innerHTML=stories.map((s,i)=>'<p><b>'+(i+1)+'. '+s.title+'</b>：'+s.cards.slice().sort((a,b)=>a[1]-b[1]).map(c=>c[0]).join(' → ')+'<br><a target="_blank" rel="noopener noreferrer" href="'+s.url+'">中央社新聞原文 ↗</a></p>').join('');
-</script></body></html>
+
+</script>
+<style>
+  .teacher, #teachercontent {
+    display: none !important;
+  }
+</style>
+</body>
+</html>
+
